@@ -1,0 +1,13 @@
+### TERRAFORM ###
+.terraform/
+*.swp
+*.log
+.terraform_init.lock
+terraform.tfstate.d/
+tfplan-*
+
+### VS Code ###
+.vscode/
+
+### NODE MODULES ###
+node_modules/
