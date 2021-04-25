@@ -7,6 +7,11 @@
  */
 
 #tfsec:ignore:AWS002 tfsec:ignore:AWS017
+resource "aws_kms_key" "default" {
+  description             = "This key is used to encrypt bucket objects"
+  deletion_window_in_days = 10
+}
+
 resource "aws_s3_bucket" "default" {
   bucket = var.name
   acl    = var.acl
@@ -77,6 +82,18 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
+   dynamic "server_side_encryption_configuration" {
+   for_each = var.server_side_encryption_configuration
+   content {
+     rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = aws_kms_key.default.arn
+        sse_algorithm     = lookup(server_side_encryption_configuration.value, "days", "aws:kms")
+       }
+     }
+    }
+   }
+
   tags = var.tags
 }
 
@@ -126,20 +143,9 @@ resource "aws_s3_bucket_notification" "default" {
   }
 }
 
-/* BUCKET OBJECT */
-resource "aws_s3_bucket_object" "default" {
-  for_each = fileset(var.upload, "**/*.*")
-  bucket   = aws_s3_bucket.default.bucket
-  acl      = var.acl
-  key      = replace(each.value, var.upload, "")
-  source   = "${var.upload}${each.value}"
-  etag     = filemd5("${var.upload}${each.value}")
-  tags     = var.tags
-}
-
 /* BUCKET POLICY */
 resource "aws_s3_bucket_policy" "default" {
   count  = var.create_bucket_policy ? 1 : 0
-  bucket = var.bucket
+  bucket = var.name
   policy = var.policy
 }

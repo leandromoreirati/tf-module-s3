@@ -82,6 +82,12 @@ variable "noncurrent_version_expiration" {
   description = "Enable or disable lifecycle noncurrent version expiration rules dynamic block configuration."
 }
 
+variable "server_side_encryption_configuration" {
+  type        = list
+  default     = []
+  description = "Enable or disable lifecycle noncurrent version expiration rules dynamic block configuration."
+}
+
 variable upload {
   type        = string
   default     = ""
